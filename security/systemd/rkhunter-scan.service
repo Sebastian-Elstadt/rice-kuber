@@ -1,0 +1,7 @@
+[Unit]
+Description=Skemos security — rkhunter rootkit scan
+
+[Service]
+Type=oneshot
+TimeoutStartSec=1h
+ExecStart=/usr/local/lib/skemos-security/rkhunter-scan.sh

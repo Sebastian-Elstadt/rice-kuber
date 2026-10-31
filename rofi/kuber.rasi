@@ -1,0 +1,92 @@
+/* Kuber — rofi theme. Black + red, sharp, corporate-terminal. Selection is a
+   filled red block (not an inverted white one — red carries "selected" the
+   same way it carries "focused window" in Hyprland). */
+
+* {
+    kb-bg:      #0a0a0d;
+    kb-raised:  #121216;
+    kb-ink:     #e8e8ec;
+    kb-ink-dim: #7d7d87;
+    kb-faint:   #35353d;
+    kb-rule:    #232329;
+    kb-accent:  #c81e2c;
+
+    background-color: transparent;
+    text-color:       @kb-ink;
+    font:             "JetBrains Mono 11";
+}
+
+/* right-side panel, inset 12px — same gap a tiled window keeps
+   (gaps_out 10 + 2px border). Hyprland slides it in from the right
+   (layer rule in hypr/rules.lua). */
+window {
+    background-color: @kb-raised;
+    border:           1px;
+    border-color:     @kb-rule;
+    border-radius:    0;
+    width:            460px;
+    height:           calc(100% - 24px);
+    padding:          6px;
+    location:         northeast;
+    anchor:           northeast;
+    y-offset:         12px;
+    x-offset:         -12px;
+}
+
+mainbox {
+    border:       1px;
+    border-color: @kb-faint;
+    padding:      0;
+    children:     [ inputbar, message, listview ];
+}
+
+inputbar {
+    background-color: @kb-raised;
+    border:           0 0 1px 0;
+    border-color:     @kb-rule;
+    padding:          8px 10px;
+    spacing:          8px;
+    children:         [ prompt, entry ];
+}
+
+prompt {
+    text-color: @kb-accent;
+    str:        "run ▸";
+}
+
+entry {
+    placeholder:        "";
+    placeholder-color:  @kb-ink-dim;
+    cursor:             text;
+}
+
+message {
+    background-color: @kb-raised;
+    border:           0 0 1px 0;
+    border-color:     @kb-rule;
+    padding:          6px 10px;
+}
+
+listview {
+    padding:      4px 0;
+    scrollbar:    false;
+    dynamic:      false;
+    fixed-height: true;
+    expand:       true;
+}
+
+element {
+    padding:      4px 12px;
+    text-color:   @kb-ink-dim;
+}
+element normal active   { text-color: @kb-ink; }
+/* filled red block, black text — a corp-terminal "selected row", not an
+   inverted-light highlight. */
+element selected {
+    background-color: @kb-accent;
+    text-color:       @kb-bg;
+}
+element selected active { text-color: @kb-bg; }
+
+element-text { text-color: inherit; vertical-align: 0.5; }
+element-icon { size: 0; }

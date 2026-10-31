@@ -1,0 +1,91 @@
+# Kuber — package list (bare metal). One name per line, '#' comments ok.
+# Install:  install/bootstrap.sh   (or: sudo pacman -S --needed - < this, comments stripped)
+
+# Provenance policy: every package below comes from the official Arch
+# 'core'/'extra' repos. No AUR, no yay, no Hyprland plugins in this file or
+# in bootstrap.sh — ever. That's deliberate (supply-chain risk), not an
+# oversight. AUR software is installed by hand and stays outside this
+# reproducible flow permanently.
+#
+# CPU microcode and NVIDIA packages are NOT listed here — bootstrap.sh
+# detects your hardware and adds them itself. See install/bootstrap.sh.
+
+# --- compositor + session ---
+hyprland                      # Wayland compositor (dwindle), Lua config
+uwsm                          # (optional) systemd-managed session; start-hyprland is the default launcher
+hyprshutdown                  # clean logout/shutdown helper (bound SUPER+SHIFT+E)
+xdg-desktop-portal-hyprland   # portal backend: screenshots, screencast, global shortcuts
+xdg-desktop-portal-gtk        # portal fallback: GTK file chooser
+hyprpolkitagent               # polkit auth agent (GUI privilege prompts)
+
+# --- desktop pieces ---
+waybar                        # four corner HUD modules (config.jsonc is an array of bars, not one strip)
+hyprpaper                     # wallpaper daemon (runs on metal; auto-skipped in a VM)
+hyprlock                      # screen locker
+hypridle                      # idle -> dim/lock/dpms
+mako                          # notifications
+rofi                          # launcher (native Wayland)
+
+# --- terminals ---
+foot                          # default terminal
+kitty                         # themed + ready; switch to it via one var in hypr/binds.lua
+
+# --- screenshots / clipboard ---
+grim
+slurp
+wl-clipboard
+cliphist                      # clipboard history via rofi (SUPER+V)
+
+# --- wallpaper generation ---
+imagemagick                   # renders the corner-bracket wallpaper per monitor
+
+# --- fonts ---
+ttf-jetbrains-mono            # primary monospace everywhere — deliberately NOT Skemos's Iosevka,
+ttf-jetbrains-mono-nerd       # so the two rices look distinct even before the colour theme loads
+noto-fonts                    # UTF-8 coverage fallback (no colour-emoji font on purpose)
+
+# --- cursor ---
+adwaita-cursors               # a real cursor theme (Wayland shows none without one)
+
+# --- security monitoring (SUPER+S panel — see README.md "Security") -----
+# This is the SAME shared backend Skemos installs. If Skemos already set it
+# up on this machine, bootstrap.sh skips reinstalling it (see §11) — these
+# packages are still listed so a from-scratch Kuber-only install works.
+ufw                            # firewall — enabled default-deny-incoming by bootstrap.sh
+audit                          # provides auditd: real-time watch rules on sensitive paths
+rkhunter                       # rootkit/backdoor signature scan
+arch-audit                     # checks installed packages against Arch's CVE tracker
+lynis                          # broader on-demand security posture audit (not automated)
+gitleaks                       # secret scanner — powers the pre-commit hook
+
+# --- audio (PipeWire — do NOT also install pulseaudio) ---
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+
+# --- vcs / dev essentials ---
+neovim                         # essential editor — always present, no exceptions
+openssh                        # ssh + sshd binaries. sshd is installed but
+                                # NEVER enabled by default (see INSTALL.md).
+networkmanager
+polkit
+git
+
+# --- small CLI helpers used by the config ---
+jq
+openbsd-netcat                # `nc -U` — reads Hyprland's socket2 for the drawer banner
+libnotify                     # notify-send
+brightnessctl                 # backlight keys (now functional on a real panel)
+playerctl                     # media keys (optional)
+less                            # pager — used by the security panel's log view
+pciutils                        # lspci — bootstrap.sh's GPU detection (needs it before this list installs)
+
+# --- Wayland app integration ---
+qt5-wayland
+qt6-wayland
+
+# --- GPU ---------------------------------------------------------------------
+# mesa, nvidia-open-dkms, and related packages are auto-detected and added by
+# bootstrap.sh based on hardware. See install/bootstrap.sh §1.

@@ -1,0 +1,35 @@
+# Kuber — mako. Black card, sharp, red left-rule accent on every toast and a
+# filled red card on urgent (not just a border) so it reads as an alert, not
+# a slightly-different info card.
+
+font=JetBrains Mono 10
+background-color=#121216
+text-color=#e8e8ec
+border-color=#35353d
+progress-color=over #c81e2c
+border-size=1
+border-radius=0
+padding=10,14
+margin=52,44
+outer-margin=8
+default-timeout=6000
+ignore-timeout=0
+max-visible=4
+width=360
+height=170
+layer=overlay
+anchor=top-right
+icons=0
+markup=1
+format=<span color="#c81e2c">▸</span> <b>%s</b>\n<span color="#7d7d87">%b</span>
+
+[urgency=low]
+text-color=#7d7d87
+format=<span color="#35353d">▸</span> %s\n<span color="#7d7d87">%b</span>
+
+[urgency=high]
+background-color=#c81e2c
+border-color=#c81e2c
+text-color=#0a0a0d
+default-timeout=0
+format=<span color="#0a0a0d">▸ %s</span>\n%b

@@ -1,0 +1,24 @@
+#!/bin/bash
+# Skemos security — privileged dispatcher. Installed root:root 0755 at
+# /usr/local/bin/skemos-security-run by bootstrap.sh (Task 14); granted
+# NOPASSWD via /etc/sudoers.d/skemos-security for exactly this path.
+#
+# Only starts one of a hardcoded set of systemd units. Never execute
+# arbitrary input here — this file is the entire trust boundary for the
+# sudoers rule.
+set -euo pipefail
+
+[[ $# -eq 1 ]] || { echo "skemos-security-run: expected exactly one argument" >&2; exit 1; }
+
+case "${1:-}" in
+  integrity)    exec /usr/bin/systemctl start skemos-integrity.service ;;
+  rkhunter)     exec /usr/bin/systemctl start rkhunter-scan.service ;;
+  arch-audit)   exec /usr/bin/systemctl start arch-audit-scan.service ;;
+  ufw-status)   exec /usr/bin/systemctl start ufw-status.service ;;
+  audit-status) exec /usr/bin/systemctl start audit-status.service ;;
+  *)
+    echo "skemos-security-run: unknown job '${1:-}'" >&2
+    echo "expected one of: integrity rkhunter arch-audit ufw-status audit-status" >&2
+    exit 1
+    ;;
+esac
