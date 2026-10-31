@@ -97,12 +97,16 @@ hl.config({ animations = { enabled = true } })
 hl.curve("kbLinear", { type = "bezier", points = { { 0.0, 0.0 }, { 1.0, 1.0 } } })
 hl.curve("kbSnap",   { type = "bezier", points = { { 0.1, 0.0 }, { 0.0, 1.0 } } })  -- near-instant, no overshoot
 hl.curve("kbGone",   { type = "bezier", points = { { 0.0, 0.85 }, { 0.1, 1.0 } } }) -- front-loaded cut
-hl.curve("kbRail",   { type = "bezier", points = { { 0.16, 1.0 }, { 0.3, 1.0 } } }) -- panel travel, hard stop
+-- "ease-out-back": overshoots past 1.0 then settles — a spring recoil, not a
+-- slide or fade. Reserved for events worth a flourish (a window arriving, a
+-- panel sliding onto its rail); everyday tiling stays on kbSnap so it
+-- doesn't get bouncy and annoying on every focus change.
+hl.curve("kbPop",    { type = "bezier", points = { { 0.34, 1.56 }, { 0.64, 1.0 } } })
 
 hl.animation({ leaf = "global", enabled = true, speed = 8, bezier = "kbSnap" })
 
 hl.animation({ leaf = "windows",     enabled = true, speed = 7,  bezier = "kbSnap", style = "popin 98%" })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = 7,  bezier = "kbSnap", style = "popin 98%" })
+hl.animation({ leaf = "windowsIn",   enabled = true, speed = 6,  bezier = "kbPop",  style = "popin 90%" })
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 16, bezier = "kbGone", style = "popin 99%" })
 hl.animation({ leaf = "windowsMove", enabled = false })
 
@@ -118,4 +122,7 @@ hl.animation({ leaf = "borderangle", enabled = false })
 
 hl.animation({ leaf = "workspaces",       enabled = true, speed = 7,  bezier = "kbSnap", style = "slidefade 8%" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 8,  bezier = "kbSnap", style = "slidevert" })
-hl.animation({ leaf = "layers",           enabled = true, speed = 10, bezier = "kbRail", style = "slidefade 6%" })
+-- rofi + the security panel both animate on this leaf (layer_rule
+-- animation="slide" in rules.lua) — kbPop gives them a spring-in recoil
+-- instead of sliding to a dead stop.
+hl.animation({ leaf = "layers",           enabled = true, speed = 9,  bezier = "kbPop", style = "slidefade 6%" })

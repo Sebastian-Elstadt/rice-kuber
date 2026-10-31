@@ -1,21 +1,24 @@
 // Kuber — Waybar. NOT one top strip: four small corner HUD modules, each its
 // own layer-shell surface (waybar supports a JSON array of bar configs — one
 // GTK window per entry). "name" on each entry is what style.css targets.
-// Disclosure: this repo was assembled without a live Hyprland session to
-// screenshot against — corner placement depends on waybar actually sizing
-// each window to its content instead of stretching across its anchored
-// edge. If a bar stretches full-width on your machine, trim this file's
-// "width" values first; that's the one thing I couldn't verify from here.
+// Correction from an earlier version of this file: dropping "width"
+// entirely does NOT make waybar size to content — confirmed live, it makes
+// the bar stretch to the FULL OUTPUT WIDTH regardless of margin-left/
+// margin-right (waybar's log reported "width: 2552" on all four once width
+// was removed). "width" is required to keep these as corner boxes; the fix
+// for wasted space is a SMALLER width, not no width. height is trimmed to
+// 24 (was 30) regardless — four separate corner plates read as bulkier
+// than one top strip even at the same height.
 [
   // ---- top-left: brand + workspaces --------------------------------------
   {
     "name": "tl",
     "layer": "top",
     "position": "top",
-    "height": 30,
-    "width": 340,
-    "margin-top": 10,
-    "margin-left": 10,
+    "height": 24,
+    "width": 300,
+    "margin-top": 8,
+    "margin-left": 8,
     "spacing": 0,
 
     "modules-left": ["custom/brand", "hyprland/workspaces"],
@@ -45,10 +48,10 @@
     "name": "tr",
     "layer": "top",
     "position": "top",
-    "height": 30,
-    "width": 150,
-    "margin-top": 10,
-    "margin-right": 10,
+    "height": 24,
+    "width": 110,
+    "margin-top": 8,
+    "margin-right": 8,
     "spacing": 0,
 
     "modules-right": ["clock"],
@@ -65,10 +68,10 @@
     "name": "bl",
     "layer": "top",
     "position": "bottom",
-    "height": 30,
-    "width": 480,
-    "margin-bottom": 10,
-    "margin-left": 10,
+    "height": 24,
+    "width": 300,
+    "margin-bottom": 8,
+    "margin-left": 8,
     "spacing": 0,
 
     "modules-left": ["custom/security", "cpu", "memory", "custom/temp", "custom/minimized"],
@@ -100,10 +103,10 @@
     "name": "br",
     "layer": "top",
     "position": "bottom",
-    "height": 30,
-    "width": 420,
-    "margin-bottom": 10,
-    "margin-right": 10,
+    "height": 24,
+    "width": 360,
+    "margin-bottom": 8,
+    "margin-right": 8,
     "spacing": 0,
 
     "modules-right": ["custom/rev", "tray", "wireplumber", "network", "custom/mode"],
