@@ -97,22 +97,29 @@ hl.env("HYPRCURSOR_SIZE", "24")
 -- control. No slide anywhere except the panel/launcher edge-ins (rules.lua),
 -- which get a slightly longer, deliberate travel — a panel sliding into a
 -- rail, not a window animating.
+--
+-- An earlier version gave "eventful" opens (new windows, rofi/the security
+-- panel) a spring/overshoot curve for flourish. Dropped: an elastic bounce
+-- reads as generic UI polish, not corp-HUD. The flourish for those events
+-- now lives in the glitch burst below (a signal-tear shader flash, same
+-- technique as binds.lua's D/R/W/S wiring) — the motion curve itself stays
+-- hard and mechanical, same family as kbSnap, just tuned for a visible
+-- scale-in rather than the near-imperceptible one on everyday windows.
 hl.config({ animations = { enabled = true } })
 
 hl.curve("kbLinear", { type = "bezier", points = { { 0.0, 0.0 }, { 1.0, 1.0 } } })
 hl.curve("kbSnap",   { type = "bezier", points = { { 0.1, 0.0 }, { 0.0, 1.0 } } })  -- near-instant, no overshoot
 hl.curve("kbGone",   { type = "bezier", points = { { 0.0, 0.85 }, { 0.1, 1.0 } } }) -- front-loaded cut
--- "ease-out-back": overshoots past 1.0 then settles — a spring recoil, not a
--- slide or fade. Reserved for events worth a flourish (a window arriving, a
--- panel sliding onto its rail); everyday tiling stays on kbSnap so it
--- doesn't get bouncy and annoying on every focus change.
-hl.curve("kbPop",    { type = "bezier", points = { { 0.34, 1.56 }, { 0.64, 1.0 } } })
+-- fast decel, no point above y=1.0 anywhere — guaranteed no overshoot/
+-- bounce. A window or panel snaps to its final size/position and stops
+-- dead, like a HUD element locking on, not settling into place.
+hl.curve("kbMaterialize", { type = "bezier", points = { { 0.05, 0.85 }, { 0.15, 1.0 } } })
 
 hl.animation({ leaf = "global", enabled = true, speed = 8, bezier = "kbSnap" })
 
-hl.animation({ leaf = "windows",     enabled = true, speed = 7,  bezier = "kbSnap", style = "popin 98%" })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = 6,  bezier = "kbPop",  style = "popin 90%" })
-hl.animation({ leaf = "windowsOut",  enabled = true, speed = 16, bezier = "kbGone", style = "popin 99%" })
+hl.animation({ leaf = "windows",     enabled = true, speed = 7,  bezier = "kbSnap",        style = "popin 98%" })
+hl.animation({ leaf = "windowsIn",   enabled = true, speed = 5,  bezier = "kbMaterialize",  style = "popin 90%" })
+hl.animation({ leaf = "windowsOut",  enabled = true, speed = 16, bezier = "kbGone",         style = "popin 99%" })
 hl.animation({ leaf = "windowsMove", enabled = false })
 
 hl.animation({ leaf = "fade",   enabled = true, speed = 7,  bezier = "kbLinear" })
@@ -128,6 +135,19 @@ hl.animation({ leaf = "borderangle", enabled = false })
 hl.animation({ leaf = "workspaces",       enabled = true, speed = 7,  bezier = "kbSnap", style = "slidefade 8%" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 8,  bezier = "kbSnap", style = "slidevert" })
 -- rofi + the security panel both animate on this leaf (layer_rule
--- animation="slide" in rules.lua) — kbPop gives them a spring-in recoil
--- instead of sliding to a dead stop.
-hl.animation({ leaf = "layers",           enabled = true, speed = 9,  bezier = "kbPop", style = "slidefade 6%" })
+-- animation="slide" in rules.lua) — same hard materialize as windowsIn,
+-- no spring.
+hl.animation({ leaf = "layers",           enabled = true, speed = 7,  bezier = "kbMaterialize", style = "slidefade 6%" })
+
+-- ---- Window-open flourish: glitch burst, not a bounce -----------------
+-- Every new window gets the same signal-tear shader flash binds.lua fires
+-- for rofi/the switcher/the security panel (hypr/scripts/glitch.sh — three
+-- static shaders swapped over ~90ms, no `time` uniform, damage tracking
+-- stays on). kuber-security is skipped here because SUPER+S already fires
+-- its own pre-roll burst before the panel spawns; this hook would just
+-- double it up moments later when the foot window itself maps.
+local GLITCH = HOME .. "/.config/hypr/scripts/glitch.sh"
+hl.on("window.open", function(w)
+  if w and w.class == "kuber-security" then return end
+  hl.exec_cmd(GLITCH)
+end)

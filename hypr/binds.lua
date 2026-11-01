@@ -19,7 +19,8 @@ hl.bind(mod .. " + Q",              hl.dsp.exec_cmd(terminal))
 hl.bind(mod .. " + Return",         hl.dsp.exec_cmd(terminal))
 -- D/R/W open a HUD surface — each gets a glitch-burst pre-roll (see
 -- hypr/scripts/glitch.sh). Everyday binds (terminal, focus, workspaces)
--- deliberately don't, same reserve-the-flourish rule as look.lua's kbPop.
+-- deliberately don't; new windows get the same burst via look.lua's
+-- window.open hook instead.
 hl.bind(mod .. " + D",              hl.dsp.exec_cmd(GLITCH .. " " .. launcher))
 hl.bind(mod .. " + R",              hl.dsp.exec_cmd(GLITCH .. " " .. launcher))
 hl.bind(mod .. " + C",              hl.dsp.window.close())
