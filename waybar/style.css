@@ -1,6 +1,10 @@
-/* Kuber — Waybar. Four small corp-HUD modules in the screen corners, not one
-   bar across the top. Flat black panels, hairline rule, one red accent.
-   Palette mirrors hypr/colors.lua. */
+/* Kuber — Waybar. One full-width, fully-transparent bar (see config.jsonc's
+   header for why: Hyprland anchors both horizontal edges for a top/bottom
+   bar, so a narrower window just centres itself, ignoring asymmetric
+   margins). The two corp-HUD "plates" are drawn here instead, directly on
+   the .modules-left / .modules-right containers — real GTK boxes, sized to
+   their own content, pinned to the window's own edges by the bar's normal
+   left/right module flow. */
 
 @define-color bg        #0a0a0d;
 @define-color raised    #121216;
@@ -19,20 +23,18 @@
   font-size: 11px;
   font-weight: 500;
   /* every hover/click state change below animates through this instead of
-     snapping — the "better interactive animation" ask, done in CSS rather
-     than a shader (see hypr/look.lua's header note for why). */
+     snapping — interactive motion lives here; the screen-wide "cyber" read
+     is the static shader (hypr/shaders/kuber.frag), not animated CSS. */
   transition: background-color 110ms cubic-bezier(0.2, 0.9, 0.3, 1),
               color            110ms cubic-bezier(0.2, 0.9, 0.3, 1),
               box-shadow       110ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
-/* every corner module: a solid plate with a 1px rule and a flat red
-   corner-tab in the top-left, instead of a diagonal cut (GTK CSS has no
-   clip-path — this is the closest honest equivalent). */
+/* the bar's own window: invisible. It only exists to anchor correctly and
+   host the two module groups below — it is not itself a panel. */
 window#waybar {
-  background: @raised;
+  background: transparent;
   color: @ink-dim;
-  border: 1px solid @rule;
 }
 
 tooltip {
@@ -41,6 +43,13 @@ tooltip {
   color: @ink;
 }
 tooltip label { color: @ink; }
+
+/* ---- the two plates ---------------------------------------------------- */
+.modules-left,
+.modules-right {
+  background: @raised;
+  border: 1px solid @rule;
+}
 
 /* ---- cells: a quiet 1px divider on the left ---------------------- */
 #workspaces,
@@ -59,9 +68,14 @@ tooltip label { color: @ink; }
   padding: 0 9px;
   box-shadow: inset 1px 0 0 @rule;
 }
+/* leftmost cell in each plate shouldn't carry a divider against the plate's own edge */
+.modules-left > widget:first-child > #custom-brand,
+.modules-right > widget:first-child > #custom-rev {
+  box-shadow: none;
+}
 
-/* ---- top-left: brand + workspaces ---------------------------------- */
-window#waybar.tl #custom-brand {
+/* ---- left plate: brand + workspaces + security + vitals --------------- */
+#custom-brand {
   box-shadow: inset 3px 0 0 @accent;   /* the one hard-edged brand tab */
   padding: 0 14px 0 11px;
   color: @ink;
@@ -69,8 +83,8 @@ window#waybar.tl #custom-brand {
   font-weight: 700;
 }
 
-window#waybar.tl #workspaces { margin: 0; }
-window#waybar.tl #workspaces button {
+#workspaces { margin: 0; }
+#workspaces button {
   padding: 0 9px;
   margin: 0;
   min-width: 22px;
@@ -79,96 +93,94 @@ window#waybar.tl #workspaces button {
   font-feature-settings: "tnum";
   box-shadow: inset 0 0 0 1px transparent;
 }
-window#waybar.tl #workspaces button.empty { color: @ink-faint; }
-window#waybar.tl #workspaces button:hover {
+#workspaces button.empty { color: @ink-faint; }
+#workspaces button:hover {
   color: @ink-dim;
   box-shadow: inset 0 0 0 1px @rule;
 }
 /* selected tab: filled red, not an underline — reads as a corp tab, not a tick */
-window#waybar.tl #workspaces button.active {
+#workspaces button.active {
   color: @bg;
   background: @accent;
   font-weight: 700;
 }
-window#waybar.tl #workspaces button.urgent {
+#workspaces button.urgent {
   color: @accent;
   box-shadow: inset 0 0 0 1px @accent;
 }
 
-/* ---- top-right: clock ------------------------------------------------ */
-window#waybar.tr #clock {
+#custom-security {
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+#custom-security.ok      { color: @ink-dim; }
+#custom-security.unknown { color: @ink-faint; }
+#custom-security.warn    { color: @data; }
+#custom-security.fail    { color: @accent; }
+#custom-security:hover   { box-shadow: inset 0 -2px 0 0 @accent; }
+
+#cpu,
+#memory,
+#custom-temp {
+  color: @ink-dim;
+  letter-spacing: 0.5px;
+}
+#cpu         { min-width: 50px; }
+#memory      { min-width: 50px; }
+#custom-temp { min-width: 28px; }
+#custom-temp.hot { color: @accent; }
+
+#custom-minimized {
+  color: @accent;
+  letter-spacing: 1px;
+}
+#custom-minimized:hover {
+  color: @ink;
+  background: @accent;
+}
+#custom-minimized.empty {
+  padding: 0; margin: 0; min-width: 0;
+  box-shadow: none;
+}
+
+/* ---- right plate: rev / tray / audio / net / mode / clock -------------- */
+#custom-rev {
+  color: @ink-faint;
+  letter-spacing: 1px;
+  min-width: 72px;
+}
+#custom-rev:hover { color: @ink-dim; }
+#custom-rev.dirty { color: @ink-dim; }
+
+#tray { padding: 0 8px; }
+#tray > widget { padding: 0 3px; }
+
+#wireplumber { color: @ink-dim; }
+#wireplumber:hover { color: @ink; }
+#wireplumber.muted { color: @accent; }
+
+#network { color: @ink-dim; min-width: 88px; letter-spacing: 0.5px; }
+#network.disconnected { color: @accent; }
+
+#custom-mode {
+  margin: 3px 0;
+  color: @accent;
+  letter-spacing: 2px;
+  box-shadow: inset 0 0 0 1px @rule;
+}
+#custom-mode.desk {
+  color: @bg;
+  background: @accent;
+  box-shadow: inset 0 0 0 1px @accent;
+}
+
+#clock {
   color: @ink;
   font-feature-settings: "tnum";
   letter-spacing: 1px;
   font-weight: 700;
   font-size: 13px;
 }
-
-/* ---- bottom-left: vitals + security ----------------------------------- */
-window#waybar.bl #custom-security {
-  letter-spacing: 1px;
-  font-weight: 700;
-}
-window#waybar.bl #custom-security.ok      { color: @ink-dim; }
-window#waybar.bl #custom-security.unknown { color: @ink-faint; }
-window#waybar.bl #custom-security.warn    { color: @data; }
-window#waybar.bl #custom-security.fail    { color: @accent; }
-window#waybar.bl #custom-security:hover   { box-shadow: inset 0 -2px 0 0 @accent; }
-
-window#waybar.bl #cpu,
-window#waybar.bl #memory,
-window#waybar.bl #custom-temp {
-  color: @ink-dim;
-  letter-spacing: 0.5px;
-}
-window#waybar.bl #cpu         { min-width: 50px; }
-window#waybar.bl #memory      { min-width: 50px; }
-window#waybar.bl #custom-temp { min-width: 28px; }
-window#waybar.bl #custom-temp.hot { color: @accent; }
-
-window#waybar.bl #custom-minimized {
-  color: @accent;
-  letter-spacing: 1px;
-}
-window#waybar.bl #custom-minimized:hover {
-  color: @ink;
-  background: @accent;
-}
-window#waybar.bl #custom-minimized.empty {
-  padding: 0; margin: 0; min-width: 0;
-  box-shadow: none;
-}
-
-/* ---- bottom-right: mode / net / audio / tray / rev -------------------- */
-window#waybar.br #custom-mode {
-  margin: 3px 0;
-  color: @accent;
-  letter-spacing: 2px;
-  box-shadow: inset 0 0 0 1px @rule;
-}
-window#waybar.br #custom-mode.desk {
-  color: @bg;
-  background: @accent;
-  box-shadow: inset 0 0 0 1px @accent;
-}
-
-window#waybar.br #network { color: @ink-dim; min-width: 88px; letter-spacing: 0.5px; }
-window#waybar.br #network.disconnected { color: @accent; }
-
-window#waybar.br #wireplumber { color: @ink-dim; }
-window#waybar.br #wireplumber:hover { color: @ink; }
-window#waybar.br #wireplumber.muted { color: @accent; }
-
-window#waybar.br #tray { padding: 0 8px; }
-window#waybar.br #tray > widget { padding: 0 3px; }
-
-window#waybar.br #custom-rev {
-  color: @ink-faint;
-  letter-spacing: 1px;
-  min-width: 72px;
-}
-window#waybar.br #custom-rev:hover { color: @ink-dim; }
-window#waybar.br #custom-rev.dirty { color: @ink-dim; }
 
 /* data-tick colour, used sparingly where a module reads a live telemetry
    value rather than a state (reserved for future custom modules —

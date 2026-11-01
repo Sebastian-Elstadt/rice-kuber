@@ -1,10 +1,13 @@
 -- Kuber — look and feel.
 -- Black glass + corp red. rounding 0, border 2. Motion is a hard snap — a
--- targeting reticle locking on, not a fade. No screen shader for now (the
--- animated-shader cost lesson from Skemos: a `time` uniform forces damage
--- tracking off everywhere — if a shader is added later here, keep it static).
+-- targeting reticle locking on, not a fade.
+--
+-- Screen shader: static chromatic-aberration/scanline/fresnel HUD-glass
+-- effect (hypr/shaders/kuber.frag). No `time` uniform — same pattern
+-- Skemos proved out, so debug:damage_tracking stays on and this is free.
 
 local c = require("colors")
+local HOME = os.getenv("HOME")
 
 hl.config({
   general = {
@@ -41,6 +44,8 @@ hl.config({
     shadow = { enabled = false },
     glow        = { enabled = false },
     motion_blur = { enabled = false },
+
+    screen_shader = HOME .. "/.config/hypr/shaders/kuber.frag",
   },
 
   dwindle = {

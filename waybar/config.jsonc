@@ -1,145 +1,111 @@
-// Kuber — Waybar. NOT one top strip: four small corner HUD modules, each its
-// own layer-shell surface (waybar supports a JSON array of bar configs — one
-// GTK window per entry). "name" on each entry is what style.css targets.
-// Correction from an earlier version of this file: dropping "width"
-// entirely does NOT make waybar size to content — confirmed live, it makes
-// the bar stretch to the FULL OUTPUT WIDTH regardless of margin-left/
-// margin-right (waybar's log reported "width: 2552" on all four once width
-// was removed). "width" is required to keep these as corner boxes; the fix
-// for wasted space is a SMALLER width, not no width. height is trimmed to
-// 24 (was 30) regardless — four separate corner plates read as bulkier
-// than one top strip even at the same height.
-[
-  // ---- top-left: brand + workspaces --------------------------------------
-  {
-    "name": "tl",
-    "layer": "top",
-    "position": "top",
-    "height": 24,
-    "width": 300,
-    "margin-top": 8,
-    "margin-left": 8,
-    "spacing": 0,
+// Kuber — Waybar.
+//
+// This is ONE full-width, fully-transparent bar — not several separate
+// layer-shell windows. That's a deliberate fix for a real Hyprland/waybar
+// bug found live: when a bar's "position" is top/bottom, waybar anchors
+// LEFT+RIGHT+<edge> as a fixed set. With both horizontal edges anchored,
+// a narrower explicit "width" makes the surface land dead-centre — margin-
+// left/margin-right are silently ignored (confirmed: margin-left:1200 had
+// zero effect on the resulting x position). Two such windows on the same
+// edge also auto-stack vertically to avoid overlapping, which is how the
+// old four-corner-window layout actually rendered (never caught, since it
+// was fixed for width but not re-screenshotted afterward).
+//
+// The fix: let THIS window be the full, uncontested, correctly-anchored
+// bar — then draw the two "plates" in CSS on the .modules-left and
+// .modules-right containers (real, independently stylable GTK boxes —
+// confirmed against waybar's own /etc/xdg/waybar/style.css, which styles
+// them the same way). Each plate then sizes to its own content natively,
+// so there's no more guessing pixel widths, and there's only one row,
+// not two.
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 24,
+  "margin-bottom": 10,
+  "margin-left": 10,
+  "margin-right": 10,
+  "spacing": 0,
 
-    "modules-left": ["custom/brand", "hyprland/workspaces"],
+  "modules-left": [
+    "custom/brand", "hyprland/workspaces", "custom/security",
+    "cpu", "memory", "custom/temp", "custom/minimized"
+  ],
+  "modules-right": ["custom/rev", "tray", "wireplumber", "network", "custom/mode", "clock"],
 
-    "custom/brand": {
-      "exec": "echo KUBER",
-      "format": "{}",
-      "tooltip": false,
-      "interval": "once"
-    },
-
-    "hyprland/workspaces": {
-      "format": "{icon}",
-      "format-icons": {
-        "1": "01", "2": "02", "3": "03", "4": "04", "5": "05",
-        "6": "06", "7": "07", "8": "08", "9": "09", "10": "10",
-        "urgent": "!!", "default": "··"
-      },
-      "on-click": "activate",
-      "sort-by-number": true,
-      "persistent-workspaces": { "*": [1, 2, 3, 4, 5] }
-    }
+  "custom/brand": {
+    "exec": "echo KUBER",
+    "format": "{}",
+    "tooltip": false,
+    "interval": "once"
   },
 
-  // ---- top-right: clock ---------------------------------------------------
-  {
-    "name": "tr",
-    "layer": "top",
-    "position": "top",
-    "height": 24,
-    "width": 110,
-    "margin-top": 8,
-    "margin-right": 8,
-    "spacing": 0,
-
-    "modules-right": ["clock"],
-
-    "clock": {
-      "format": "{:%H:%M}",
-      "tooltip-format": "<tt>{calendar}</tt>",
-      "calendar": { "format": { "today": "<b>{}</b>" } }
-    }
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "1": "01", "2": "02", "3": "03", "4": "04", "5": "05",
+      "6": "06", "7": "07", "8": "08", "9": "09", "10": "10",
+      "urgent": "!!", "default": "··"
+    },
+    "on-click": "activate",
+    "sort-by-number": true,
+    "persistent-workspaces": { "*": [1, 2, 3, 4, 5] }
   },
 
-  // ---- bottom-left: vitals + security -------------------------------------
-  {
-    "name": "bl",
-    "layer": "top",
-    "position": "bottom",
-    "height": 24,
-    "width": 300,
-    "margin-bottom": 8,
-    "margin-left": 8,
-    "spacing": 0,
-
-    "modules-left": ["custom/security", "cpu", "memory", "custom/temp", "custom/minimized"],
-
-    "custom/security": {
-      "exec": "~/.config/waybar/scripts/security-status.sh",
-      "return-type": "json",
-      "interval": 15,
-      "on-click": "~/.config/security/scripts/security-toggle.sh"
-    },
-    "cpu":    { "format": "CPU {usage}%", "interval": 3, "tooltip": false },
-    "memory": { "format": "MEM {percentage}%", "interval": 5, "tooltip-format": "{used:0.1f} / {total:0.1f} GiB" },
-    "custom/temp": {
-      "exec": "~/.config/waybar/scripts/temp.sh",
-      "return-type": "json",
-      "interval": 5
-    },
-    "custom/minimized": {
-      "exec": "~/.config/waybar/scripts/minimized.sh",
-      "return-type": "json",
-      "interval": 2,
-      "signal": 9,
-      "on-click": "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"minimized\")'"
-    }
+  "custom/security": {
+    "exec": "~/.config/waybar/scripts/security-status.sh",
+    "return-type": "json",
+    "interval": 15,
+    "on-click": "~/.config/security/scripts/security-toggle.sh"
+  },
+  "cpu":    { "format": "CPU {usage}%", "interval": 3, "tooltip": false },
+  "memory": { "format": "MEM {percentage}%", "interval": 5, "tooltip-format": "{used:0.1f} / {total:0.1f} GiB" },
+  "custom/temp": {
+    "exec": "~/.config/waybar/scripts/temp.sh",
+    "return-type": "json",
+    "interval": 5
+  },
+  "custom/minimized": {
+    "exec": "~/.config/waybar/scripts/minimized.sh",
+    "return-type": "json",
+    "interval": 2,
+    "signal": 9,
+    "on-click": "hyprctl dispatch 'hl.dsp.workspace.toggle_special(\"minimized\")'"
   },
 
-  // ---- bottom-right: mode / net / audio / tray / rev ----------------------
-  {
-    "name": "br",
-    "layer": "top",
-    "position": "bottom",
-    "height": 24,
-    "width": 360,
-    "margin-bottom": 8,
-    "margin-right": 8,
-    "spacing": 0,
-
-    "modules-right": ["custom/rev", "tray", "wireplumber", "network", "custom/mode"],
-
-    "custom/mode": {
-      "exec": "~/.config/waybar/scripts/mode.sh",
-      "return-type": "json",
-      "format": "MODE {}",
-      "interval": 1,
-      "signal": 8
-    },
-    "network": {
-      "format-ethernet": "NET {bandwidthDownBytes}",
-      "format-wifi": "NET {signalStrength}",
-      "format-disconnected": "NET ✕",
-      "interval": 3,
-      "tooltip-format": "{ifname}  {ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}"
-    },
-    "wireplumber": {
-      "format": "SND {volume}",
-      "format-muted": "SND ✕",
-      "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-      "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+",
-      "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-",
-      "max-volume": 100,
-      "tooltip": false
-    },
-    "tray": { "icon-size": 16, "spacing": 8 },
-    "custom/rev": {
-      "exec": "~/.config/waybar/scripts/rev.sh",
-      "return-type": "json",
-      "interval": 30,
-      "on-click": "foot -e sh -c 'cd ~/.config && git log --oneline -20 && read -n1 -p \"\"'"
-    }
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": { "format": { "today": "<b>{}</b>" } }
+  },
+  "custom/mode": {
+    "exec": "~/.config/waybar/scripts/mode.sh",
+    "return-type": "json",
+    "format": "MODE {}",
+    "interval": 1,
+    "signal": 8
+  },
+  "network": {
+    "format-ethernet": "NET {bandwidthDownBytes}",
+    "format-wifi": "NET {signalStrength}",
+    "format-disconnected": "NET ✕",
+    "interval": 3,
+    "tooltip-format": "{ifname}  {ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}"
+  },
+  "wireplumber": {
+    "format": "SND {volume}",
+    "format-muted": "SND ✕",
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-",
+    "max-volume": 100,
+    "tooltip": false
+  },
+  "tray": { "icon-size": 16, "spacing": 8 },
+  "custom/rev": {
+    "exec": "~/.config/waybar/scripts/rev.sh",
+    "return-type": "json",
+    "interval": 30,
+    "on-click": "foot -e sh -c 'cd ~/.config && git log --oneline -20 && read -n1 -p \"\"'"
   }
-]
+}
