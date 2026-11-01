@@ -9,6 +9,7 @@ local mod   = "SUPER"
 local HOME  = os.getenv("HOME")
 local SCRIPTS  = HOME .. "/.config/hypr/scripts"
 local SECURITY = HOME .. "/.config/security/scripts"
+local GLITCH   = SCRIPTS .. "/glitch.sh"
 
 local terminal = "foot"
 local launcher = "rofi -show drun"
@@ -16,10 +17,13 @@ local launcher = "rofi -show drun"
 -- --- core (spec) ---------------------------------------------------------
 hl.bind(mod .. " + Q",              hl.dsp.exec_cmd(terminal))
 hl.bind(mod .. " + Return",         hl.dsp.exec_cmd(terminal))
-hl.bind(mod .. " + D",              hl.dsp.exec_cmd(launcher))
-hl.bind(mod .. " + R",              hl.dsp.exec_cmd(launcher))
+-- D/R/W open a HUD surface — each gets a glitch-burst pre-roll (see
+-- hypr/scripts/glitch.sh). Everyday binds (terminal, focus, workspaces)
+-- deliberately don't, same reserve-the-flourish rule as look.lua's kbPop.
+hl.bind(mod .. " + D",              hl.dsp.exec_cmd(GLITCH .. " " .. launcher))
+hl.bind(mod .. " + R",              hl.dsp.exec_cmd(GLITCH .. " " .. launcher))
 hl.bind(mod .. " + C",              hl.dsp.window.close())
-hl.bind(mod .. " + W",              hl.dsp.exec_cmd(SCRIPTS .. "/window-switch.sh"))
+hl.bind(mod .. " + W",              hl.dsp.exec_cmd(GLITCH .. " " .. SCRIPTS .. "/window-switch.sh"))
 hl.bind(mod .. " + SHIFT + SPACE",  function() modes.toggle() end)
 hl.bind(mod .. " + SPACE",          hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + M",              function() minimize.minimize() end)
@@ -40,7 +44,7 @@ hl.bind(mod .. " + J",              hl.dsp.layout("togglesplit"))
 -- SUPER+S toggles the panel. Same shared security backend as Skemos (same
 -- systemd units, same /var/log/skemos-security, same sudo wrapper) — see
 -- README.md "Security" for why that's shared rather than duplicated.
-hl.bind(mod .. " + S", hl.dsp.exec_cmd(SECURITY .. "/security-toggle.sh"))
+hl.bind(mod .. " + S", hl.dsp.exec_cmd(GLITCH .. " " .. SECURITY .. "/security-toggle.sh"))
 -- ==== end SECURITY PANEL =================================================
 
 -- --- focus / move: ARROW KEYS -----------------------------------------
